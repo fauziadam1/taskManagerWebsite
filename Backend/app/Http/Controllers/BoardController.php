@@ -1,0 +1,71 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Board;
+use Illuminate\Http\Request;
+use App\Models\Workspace;
+
+class BoardController extends Controller
+{
+    public function index(Request $request, $id)
+    {
+        $workspace = Workspace::findOrFail($id);
+
+        $board = Board::where('workspace_id', $workspace->id)->get();
+
+        return response()->json($board);
+    }
+
+    public function show($id)
+    {
+        $board = Board::findOrFail($id);
+
+        return response()->json($board);
+    }
+
+    public function store(Request $request)
+    {
+        $request->validate([
+            'title' => 'required|string',
+            'workspace_id' => 'required|exists:workspaces,id'
+        ]);
+
+        $board = Board::create([
+            'title' => $request->title,
+            'workspace_id' => $request->workspace_id
+        ]);
+
+        return response()->json([
+            'message' => 'Board created',
+            'data' => $board
+        ], 201);
+    }
+
+    public function update(Request $request, $id)
+    {
+        $board = Board::findOrFail($id);
+
+        $request->validate([
+            'title' => 'sometimes|reqruired|string',
+        ]);
+
+        $board->update($request->only(['title']));
+
+        return response()->json([
+            'message' => 'Board updated',
+            'data' => $board
+        ], 201);
+    }
+
+    public function destroy($id)
+    {
+        $board = Board::findOrFail($id);
+
+        $board->delete();
+
+        return response()->json([
+            'message' => 'Board deleted'
+        ], 200);
+    }
+}
