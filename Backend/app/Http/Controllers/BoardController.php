@@ -8,7 +8,7 @@ use App\Models\Workspace;
 
 class BoardController extends Controller
 {
-    public function index(Request $request, $id)
+    public function index($id)
     {
         $workspace = Workspace::findOrFail($id);
 

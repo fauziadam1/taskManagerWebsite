@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\BoardController;
+use App\Http\Controllers\CardController;
 use App\Http\Controllers\ListController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\WorkspaceController;
@@ -28,6 +29,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/list', [ListController::class, 'store']);
     Route::put('/list/{list}', [ListController::class, 'update']);
     Route::put('/reorder/list/{list}', [ListController::class, 'reorder']);
+
+    Route::get('/card/{card}', [CardController::class, 'show']);
+    Route::get('/list/{list}/cards', [CardController::class, 'index']);
+    Route::post('/card', [CardController::class, 'store']);
+    Route::put('/card/{card}', [CardController::class, 'update']);
+    Route::put('/reorder/card/{card}', [CardController::class, 'reorder']);
+    Route::put('/relist/card/{card}', [CardController::class, 'relist']);
+    Route::delete('/card/{card}', [CardController::class, 'destroy']);
 });
 
 Route::get('/users', [UserController::class, 'index']);

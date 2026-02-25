@@ -17,8 +17,8 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->unsignedInteger('sort_order')->default(1);
             $table->foreignId('list_id')->constrained()->cascadeOnDelete();
-            $table->enum('priority', ['Not Sure', 'Lowest', 'Low', 'Medium', 'High', 'Highest']);
-            $table->enum('status', ['Not Sure', 'Approved', 'In Review', 'Done', 'In Progress', 'To Do']);
+            $table->enum('priority', ['Not Sure', 'Lowest', 'Low', 'Medium', 'High', 'Highest'])->nullable();
+            $table->enum('status', ['Not Sure', 'Approved', 'In Review', 'Done', 'In Progress', 'To Do'])->nullable();
             $table->timestamps();
         });
     }

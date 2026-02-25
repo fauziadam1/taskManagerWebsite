@@ -11,7 +11,13 @@ class Board extends Model
         'workspace_id',
     ];
 
-    public function list() {
+    public function list()
+    {
         return $this->hasMany(Lists::class);
+    }
+
+    public function workspace()
+    {
+        return $this->belongsTo(Workspace::class);
     }
 }

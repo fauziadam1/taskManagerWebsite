@@ -8,7 +8,8 @@ use Illuminate\Http\Request;
 
 class ListController extends Controller
 {
-    public function index($id) {
+    public function index($id)
+    {
         $board = Board::findOrFail($id);
 
         $list = Lists::where('board_id', $board->id)->orderBy('sort_order')->get();
@@ -65,10 +66,7 @@ class ListController extends Controller
         $boardId = $list->board_id;
         $newPos = $request->new_position;
 
-        $lists = Lists::where('board_id', $boardId)
-            ->where('id', '!=', $list->id)
-            ->orderBy('sort_order')
-            ->get();    
+        $lists = Lists::where('board_id', $boardId)->where('id', '!=', $list->id)->orderBy('sort_order')->get();
 
         $lists->splice($newPos - 1, 0, [$list]);
 
@@ -83,7 +81,8 @@ class ListController extends Controller
         ], 201);
     }
 
-    public function destroy($id){
+    public function destroy($id)
+    {
         $list = Lists::findOrFail($id);
 
         $list->delete();

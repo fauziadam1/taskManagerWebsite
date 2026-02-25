@@ -22,7 +22,9 @@ class WorkspaceController extends Controller
             abort(403);
         }
 
-        return response()->json($workspace);
+        return response()->json([
+            'data' => $workspace
+        ]);
     }
 
     public function store(Request $request)
