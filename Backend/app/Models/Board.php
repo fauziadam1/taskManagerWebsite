@@ -10,4 +10,8 @@ class Board extends Model
         'title',
         'workspace_id',
     ];
+
+    public function list() {
+        return $this->hasMany(Lists::class);
+    }
 }

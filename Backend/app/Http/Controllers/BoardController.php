@@ -47,7 +47,7 @@ class BoardController extends Controller
         $board = Board::findOrFail($id);
 
         $request->validate([
-            'title' => 'sometimes|reqruired|string',
+            'title' => 'sometimes|required|string',
         ]);
 
         $board->update($request->only(['title']));
