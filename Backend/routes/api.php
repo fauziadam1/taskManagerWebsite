@@ -3,6 +3,7 @@
 use App\Http\Controllers\BoardController;
 use App\Http\Controllers\CardController;
 use App\Http\Controllers\ChecklistController;
+use App\Http\Controllers\ItemController;
 use App\Http\Controllers\ListController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\WorkspaceController;
@@ -44,6 +45,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/checklist/{checklist}', [ChecklistController::class, 'update']);
     Route::put('/reorder/checklist/{checklist}', [ChecklistController::class, 'reorder']);
     Route::delete('/checklist/{checklist}', [ChecklistController::class, 'destroy']);
+
+    Route::get('/checklist/{checklist}/items', [ItemController::class, 'index']);
+    Route::post('/item', [ItemController::class, 'store']);
+    Route::put('/item/{item}', [ItemController::class, 'update']);
+    Route::delete('/item/{item}', [ItemController::class, 'destroy']);
+    Route::put('/reorder/item/{item}', [ItemController::class, 'reorder']);
 });
 
 Route::get('/users', [UserController::class, 'index']);

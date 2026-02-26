@@ -3,16 +3,16 @@
 namespace App\Http\Controllers;
 
 use App\Models\Checklist;
-use App\Models\ItemChecklist;
+use App\Models\Item;
 use Illuminate\Http\Request;
 
-class ItemChecklistController extends Controller
+class ItemController extends Controller
 {
     public function index($id)
     {
         $checklist = Checklist::findOrFail($id);
 
-        $item = ItemChecklist::where('checklist_id', $checklist->id)->orderBy('sort_order')->get();
+        $item = Item::where('checklist_id', $checklist->id)->orderBy('sort_order')->get();
 
         return response()->json($item);
     }
@@ -26,12 +26,12 @@ class ItemChecklistController extends Controller
             'checklist_id' => 'required|exists:checklists,id'
         ]);
 
-        $order = ItemChecklist::where('checklist_id', $request->checklist_id)->max('sort_order');
+        $order = Item::where('checklist_id', $request->checklist_id)->max('sort_order');
 
-        $item = ItemChecklist::create([
+        $item = Item::create([
             'title' => $request->title,
             'sort_order' => ($order ?? 0) + 1,
-            'on_check' => $request->on_check,
+            'on_check' => $request->on_check ?? false,
             'checklist_id' => $request->checklist_id
         ]);
 
@@ -43,7 +43,7 @@ class ItemChecklistController extends Controller
 
     public function update(Request $request, $id)
     {
-        $item = ItemChecklist::findOrFail($id);
+        $item = Item::findOrFail($id);
 
         $request->validate([
             'title' => 'sometimes|required|string',
@@ -59,21 +59,21 @@ class ItemChecklistController extends Controller
 
     public function reorder(Request $request, $id)
     {
-        $item = ItemChecklist::findOrFail($id);
+        $itemCheck = Item::findOrFail($id);
 
         $request->validate([
             'new_position' => 'required|integer|min:1'
         ]);
 
-        $ChecklistId = $request->checklist_id;
+        $ChecklistId = $itemCheck->checklist_id;
         $newPos = $request->new_position;
 
-        $items = ItemChecklist::where('checklist_id', $ChecklistId)->where('id', '!=', $item->id)->orderBy('sort_order')->get();
+        $items = Item::where('checklist_id', $ChecklistId)->where('id', '!=', $itemCheck->id)->orderBy('sort_order')->get();
 
-        $items->splice($newPos - 1, 0, [$item]);
+        $items->splice($newPos - 1, 0, [$itemCheck]);
 
-        foreach ($items as $index) {
-            $items->update([
+        foreach ($items as $index => $item) {
+            $item->update([
                 'sort_order' => $index + 1
             ]);
         }
@@ -85,7 +85,7 @@ class ItemChecklistController extends Controller
 
     public function destroy($id)
     {
-        $item = ItemChecklist::findOrFail($id);
+        $item = Item::findOrFail($id);
 
         $item->delete();
 
