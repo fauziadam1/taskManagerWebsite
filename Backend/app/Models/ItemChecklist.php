@@ -4,18 +4,17 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Card extends Model
+class ItemChecklist extends Model
 {
     protected $fillable = [
         'title',
-        'priority',
-        'status',
+        'on_check',
         'sort_order',
-        'list_id',
+        'checklist_id'
     ];
 
     public function checklist()
     {
-        return $this->hasMany(Checklist::class);
+        return $this->belongsTo(Checklist::class);
     }
 }

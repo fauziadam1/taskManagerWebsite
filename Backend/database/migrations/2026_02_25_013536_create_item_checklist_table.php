@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('title');
             $table->boolean('on_check')->default(false);
+            $table->unsignedInteger('sort_order')->default(1);
             $table->foreignId('checklist_id')->constrained()->cascadeOnDelete();
             $table->timestamps();
         });
