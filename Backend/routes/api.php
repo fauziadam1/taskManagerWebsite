@@ -16,6 +16,7 @@ Route::get('/user', function (Request $request) {
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/me', [UserController::class, 'me']);
+    Route::post('logout', [UserController::class, 'logout']);
 
     Route::get('/workspaces/{workspace}/{user}', [WorkspaceController::class, 'show']);
     Route::get('/workspaces', [WorkspaceController::class, 'index']);
