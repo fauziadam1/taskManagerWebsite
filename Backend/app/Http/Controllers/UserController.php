@@ -12,9 +12,7 @@ class UserController extends Controller
 {
     public function me(Request $request)
     {
-        $user = $request->user();
-
-        return response()->json($user);
+        return response()->json($request->user());
     }
 
     public function index()
@@ -31,15 +29,19 @@ class UserController extends Controller
             'password' => 'required|min:6|confirmed'
         ]);
 
-        User::create([
+        $user = User::create([
             'name' => $request->name,
             'username' => $request->username,
             'email' => $request->email,
-            'password' => $request->password
+            'password' => Hash::make($request->password)
         ]);
 
+        $token = $user->createToken('auth_token')->plainTextToken;
+
         return response()->json([
-            'message' => 'Register Success'
+            'message' => 'Register Success',
+            'access_token' => $token,
+            'data' => $user
         ]);
     }
 
@@ -58,17 +60,18 @@ class UserController extends Controller
             ]);
         }
 
-        $token = $user->createToken('token')->plainTextToken;
+        $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
             'message' => 'Login Success',
-            'token' => $token
+            'access_token' => $token,
+            'data' => $user
         ]);
     }
 
     public function Logout(Request $request)
     {
-        Auth::guard('me')->logout();
+        Auth::logout();
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();
