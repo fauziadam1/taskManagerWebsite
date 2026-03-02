@@ -5,6 +5,7 @@ use App\Http\Controllers\CardController;
 use App\Http\Controllers\ChecklistController;
 use App\Http\Controllers\ItemController;
 use App\Http\Controllers\ListController;
+use App\Http\Controllers\StarController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\WorkspaceController;
 use Illuminate\Http\Request;
@@ -23,10 +24,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/workspace', [WorkspaceController::class, 'store']);
     Route::delete('/workspace/{workspace}', [WorkspaceController::class, 'destroy']);
 
-    Route::get('/workspace/{workspace}/boards', [BoardController::class, 'index']);
+    Route::get('/boards', [BoardController::class, 'index']);
+    Route::get('/boards/starred', [BoardController::class, 'starred']);
     Route::get('/board/{board}', [BoardController::class, 'show']);
     Route::post('/board', [BoardController::class, 'store']);
+    Route::put('/board/{board}/star', [BoardController::class, 'star']);
     Route::put('/board/{board}', [BoardController::class, 'update']);
+    Route::delete('/board/{board}', [BoardController::class, 'destroy']);
 
     Route::get('/board/{board}/lists', [ListController::class, 'index']);
     Route::post('/list', [ListController::class, 'store']);

@@ -8,6 +8,7 @@ class Board extends Model
 {
     protected $fillable = [
         'title',
+        'star',
         'workspace_id',
     ];
 

@@ -4,17 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\Board;
 use Illuminate\Http\Request;
-use App\Models\Workspace;
 
 class BoardController extends Controller
 {
-    public function index($id)
+    public function index()
     {
-        $workspace = Workspace::findOrFail($id);
-
-        $board = Board::where('workspace_id', $workspace->id)->get();
-
-        return response()->json($board);
+        return response()->json(Board::all());
     }
 
     public function show($id)
@@ -40,6 +35,27 @@ class BoardController extends Controller
             'message' => 'Board created',
             'data' => $board
         ], 201);
+    }
+
+    public function star($id)
+    {
+        $board = Board::findOrFail($id);
+
+        $board->update([
+            'star' => !$board->star
+        ]);
+
+        return response()->json([
+            'message' => 'Board updated',
+            'data' => $board
+        ]);
+    }
+
+    public function starred()
+    {
+        $board = Board::where('star', true)->get();
+
+        return response()->json($board);
     }
 
     public function update(Request $request, $id)
