@@ -7,9 +7,11 @@ use Illuminate\Http\Request;
 
 class BoardController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        return response()->json(Board::all());
+        $board = Board::where('user_id', $request->user()->id)->get();
+
+        return response()->json($board);
     }
 
     public function show($id)
