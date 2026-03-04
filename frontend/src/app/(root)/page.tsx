@@ -1,8 +1,8 @@
 "use client";
 
 import { useAuth } from "@/lib/auth";
-import { WorkspaceCard } from "@/components/workspace-card";
-import { Star, Users2 } from "lucide-react";
+import { WorkspaceCard } from "@/components/board-card";
+import { Rows3, Star, Users2 } from "lucide-react";
 import { StarCard } from "@/components/star-card";
 
 export default function DashboardPage() {
@@ -27,8 +27,8 @@ export default function DashboardPage() {
       </div>
       <div className="space-y-4">
         <h1 className="font-semibold text-xl flex items-center gap-2">
-          <Users2 className="size-5" />
-          Your Team Space
+          <Rows3 className="size-5" />
+          Your Board
         </h1>
         <WorkspaceCard />
       </div>

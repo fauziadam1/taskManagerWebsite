@@ -38,7 +38,7 @@ export default function RootLayout({ children }: PropsWithChildren) {
         <SidebarInset className="w-fit">
           <SidebarTrigger className="m-2 -translate-x-2 cursor-pointer" />
         </SidebarInset>
-        <div className="w-full">{children}</div>
+        <div className="w-full pr-5">{children}</div>
       </SidebarProvider>
     </div>
   );

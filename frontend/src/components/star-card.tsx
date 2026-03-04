@@ -8,6 +8,7 @@ import { Star } from "lucide-react";
 type Board = {
   id: string;
   title: string;
+  star: boolean;
 };
 
 export function StarCard() {
@@ -16,8 +17,8 @@ export function StarCard() {
   const fetchBoard = async () => {
     try {
       const res = await api.get("/api/boards/starred");
-        setBoard(res.data);
-        
+      setBoard(res.data);
+
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       const message =
@@ -33,6 +34,15 @@ export function StarCard() {
     fetchBoard();
   });
 
+  const toggleStar = async (id: string) => {
+    try {
+      const res = await api.put(`/api/board/${id}/star`);
+      setBoard((prev) =>
+        prev.map((s) => (s.id === id ? { ...s, star: res.data.data.star } : s)),
+      );
+    } catch {}
+  };
+
   return (
     <div>
       {board.length === 0 ? (
@@ -45,15 +55,21 @@ export function StarCard() {
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-4">
           {board.map((b) => (
             <Link
-              href={"/"}
+              href={`/board/${b.id}`}
               key={b.id}
               className="group relative sm:max-w-50 border rounded-xl overflow-hidden col-span-1"
             >
               <Button
                 variant="ghost"
-                className="absolute hover:bg-gray-200 opacity-0 translate-x-10 rounded-full w-9 h-9 right-1 top-1 group-hover:opacity-100 group-hover:translate-x-0"
+                className="absolute hover:bg-gray-200 opacity-0 translate-x-10 rounded-full w-9 h-9 right-1 top-1 group-hover:opacity-100 group-hover:translate-x-0 cursor-pointer"
+                onClick={(e) => {
+                  e.preventDefault();
+                  toggleStar(b.id);
+                }}
               >
-                <Star />
+                <Star
+                  className={b.star ? "fill-yellow-400 text-yellow-400" : ""}
+                />
               </Button>
               <div className="w-full h-20 bg-gray-100"></div>
               <div className="px-2 py-3">

@@ -59,7 +59,6 @@ import {
   PlusIcon,
   Rows3,
   Star,
-  StarIcon,
   Trash2Icon,
   UsersRound,
 } from "lucide-react";
@@ -71,6 +70,7 @@ import { Button } from "./ui/button";
 import { useForm } from "react-hook-form";
 import { useEffect, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
+import Link from "next/link";
 
 type Workspace = {
   id: string;
@@ -81,6 +81,7 @@ type Board = {
   id: string;
   title: string;
   workspace_id: string;
+  star: boolean;
 };
 
 type Starred = {
@@ -90,9 +91,13 @@ type Starred = {
 
 export function AppSidebar() {
   const [openSpace, setOpenSpace] = useState(false);
-  const [openBoard, setOpenBoard] = useState(false);
+  const [openBoard, setOpenBoard] = useState<string | null>(null);
   const [boards, setBoard] = useState<Board[]>([]);
   const [star, setStar] = useState<Starred[]>([]);
+  const [isWedit, setWedit] = useState<string | null>(null);
+  const [isBedit, setBedit] = useState<string | null>(null);
+  const [isWtitle, setWtitle] = useState<string>("");
+  const [isBtitle, setBtitle] = useState<string>("");
   const [workspace, setWorkspace] = useState<Workspace[]>([]);
 
   const FormWorkspace = z.object({
@@ -156,12 +161,30 @@ export function AppSidebar() {
     }
   };
 
-  const deleteWorkspace = async (WId: string) => {
-    if (!WId) return;
+  const updateWorkspace = async (id: string) => {
+    try {
+      await api.put(`/api/workspace/${id}`, { title: isWtitle });
+      setWorkspace((prev) =>
+        prev.map((w) => (w.id === id ? { ...w, title: isWtitle } : w)),
+      );
+      setWedit(null);
+      toast.success("Name updated");
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      const message =
+        error?.response?.data?.message ??
+        error.message ??
+        "Something went wrong";
+      toast.error(message);
+    }
+  };
+
+  const deleteWorkspace = async (id: string) => {
+    if (!id) return;
 
     try {
-      await api.delete(`/api/workspace/${WId}`);
-      setWorkspace((prev) => prev.filter((w) => w.id !== WId));
+      await api.delete(`/api/workspace/${id}`);
+      setWorkspace((prev) => prev.filter((w) => w.id !== id));
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       const message =
@@ -207,7 +230,7 @@ export function AppSidebar() {
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchStar();
-  }, []);
+  });
 
   const addBoard = async (data: formBoard, workspace_id: string) => {
     if (!workspace_id) return;
@@ -219,8 +242,26 @@ export function AppSidebar() {
       });
 
       setBoard((prev) => [...prev, res.data.data]);
-      setOpenBoard(false);
+      setOpenBoard(null);
       formB.reset();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      const message =
+        error?.response?.data?.message ??
+        error.message ??
+        "Something went wrong";
+      toast.error(message);
+    }
+  };
+
+  const updateBoard = async (id: string) => {
+    try {
+      await api.put(`/api/board/${id}`, { title: isBtitle });
+      setBoard((prev) =>
+        prev.map((b) => (b.id === id ? { ...b, title: isBtitle } : b)),
+      );
+      setBedit(null);
+      toast.success("Name updated");
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       const message =
@@ -247,13 +288,13 @@ export function AppSidebar() {
     }
   };
 
-  const starBoard = async (BId: string) => {
-    if (!BId) return;
+  const toggleStar = async (id: string) => {
+    if (!id) return;
 
     try {
-      const res = await api.put(`/api/board/${BId}/star`);
+      const res = await api.put(`/api/board/${id}/star`);
       setBoard((prev) =>
-        prev.map((b) => (b.id === BId ? { ...b, star: res.data.data } : b)),
+        prev.map((b) => (b.id === id ? { ...b, star: res.data.data.star } : b)),
       );
 
       await fetchStar();
@@ -273,31 +314,44 @@ export function AppSidebar() {
         <SidebarContent>
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton size="default" className="font-semibold">
-                <HomeIcon />
-                Home
+              <SidebarMenuButton
+                size="default"
+                className="font-semibold"
+                asChild
+              >
+                <Link href={"/"}>
+                  <HomeIcon />
+                  Home
+                </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
               <Collapsible className="data-[state=open]">
                 <CollapsibleTrigger asChild>
                   <SidebarMenuButton className="group font-semibold">
-                    <StarIcon className="size-4" />
+                    <Star className="size-4" />
                     Starred
                     <ChevronDownIcon className="ml-auto transition-transform group-data-[state=open]:rotate-180" />
                   </SidebarMenuButton>
                 </CollapsibleTrigger>
                 <CollapsibleContent>
                   <SidebarMenuSub>
-                    {star.map((st) => (
-                      <SidebarMenuSubButton
-                        key={st.id}
-                        className="w-full text-xs font-semibold"
-                      >
-                        <Rows3 />
-                        <span className="flex-1 truncate">{st.title}</span>
-                      </SidebarMenuSubButton>
-                    ))}
+                    {star.length === 0 ? (
+                      <SidebarMenuSubItem className="text-xs text-gray-500">
+                        Klik tombol ⭐ untuk mengubah ke star board
+                      </SidebarMenuSubItem>
+                    ) : (
+                      star.map((st) => (
+                        <SidebarMenuSubButton
+                          key={st.id}
+                          href={`/board/${st.id}`}
+                          className="w-full text-xs font-semibold"
+                        >
+                          <Rows3 />
+                          <span className="flex-1 truncate">{st.title}</span>
+                        </SidebarMenuSubButton>
+                      ))
+                    )}
                   </SidebarMenuSub>
                 </CollapsibleContent>
               </Collapsible>
@@ -330,9 +384,26 @@ export function AppSidebar() {
                                     </span>
                                     <ChevronDownIcon className="absolute inset-0 m-auto size-3 opacity-0 duration-300 group-hover/workspace:opacity-100 transition-transform group-data-[state=open]/workspace:rotate-180" />
                                   </span>
-                                  <span className="flex-1 truncate whitespace-nowrap">
-                                    {w.title}
-                                  </span>
+                                  {isWedit === w.id ? (
+                                    <input
+                                      className="h-5.5 w-28 pl-1  border rounded-sm text-xs"
+                                      value={isWtitle}
+                                      onChange={(e) =>
+                                        setWtitle(e.target.value)
+                                      }
+                                      onBlur={() => setWedit(null)}
+                                      onKeyDown={(e) => {
+                                        if (e.key === "Enter") {
+                                          updateWorkspace(w.id);
+                                        }
+                                      }}
+                                      autoFocus
+                                    />
+                                  ) : (
+                                    <span className="flex-1 truncate whitespace-nowrap">
+                                      {w.title}
+                                    </span>
+                                  )}
                                 </SidebarMenuSubButton>
                               </CollapsibleTrigger>
                               <DropdownMenu>
@@ -348,7 +419,14 @@ export function AppSidebar() {
                                   </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent className="sm:max-w-sm translate-x-13">
-                                  <DropdownMenuItem className="text-xs font-semibold">
+                                  <DropdownMenuItem
+                                    className="text-xs font-semibold"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setWedit(w.id);
+                                      setWtitle(w.title);
+                                    }}
+                                  >
                                     <Pencil className="size-3.5" />
                                     Rename
                                   </DropdownMenuItem>
@@ -408,12 +486,38 @@ export function AppSidebar() {
                                     .map((b) => (
                                       <SidebarMenuSubItem key={b.id}>
                                         <div className="flex items-center">
-                                          <SidebarMenuSubButton href={`/board/${b.id}`} className="w-full text-xs font-semibold">
-                                            <Rows3 />
-                                            <span className="flex-1 truncate">
-                                              {b.title}
-                                            </span>
-                                          </SidebarMenuSubButton>
+                                          {isBedit === b.id ? (
+                                            <div className="flex items-center text-xs pl-1.5 gap-1">
+                                              <Rows3 className="size-5" />
+                                              <input
+                                                className="border h-5.5 w-full text-xs pl-1 rounded-sm font-semibold"
+                                                value={isBtitle}
+                                                onChange={(e) =>
+                                                  setBtitle(e.target.value)
+                                                }
+                                                onKeyDown={(e) => {
+                                                  if (e.key === "Enter") {
+                                                    updateBoard(b.id);
+                                                  }
+                                                }}
+                                                onBlur={() => setBedit(null)}
+                                                onSelect={(e) =>
+                                                  e.preventDefault()
+                                                }
+                                                autoFocus
+                                              />
+                                            </div>
+                                          ) : (
+                                            <SidebarMenuSubButton
+                                              href={`/board/${b.id}`}
+                                              className="w-full text-xs font-semibold"
+                                            >
+                                              <Rows3 />
+                                              <span className="flex-1 truncate">
+                                                {b.title}
+                                              </span>
+                                            </SidebarMenuSubButton>
+                                          )}
                                           <DropdownMenu>
                                             <DropdownMenuTrigger asChild>
                                               <Button
@@ -427,15 +531,27 @@ export function AppSidebar() {
                                               </Button>
                                             </DropdownMenuTrigger>
                                             <DropdownMenuContent className="translate-x-13">
-                                              <DropdownMenuItem className="text-xs font-semibold">
+                                              <DropdownMenuItem
+                                                className="text-xs font-semibold"
+                                                onClick={() => {
+                                                  setBedit(b.id);
+                                                  setBtitle(b.title);
+                                                }}
+                                              >
                                                 <Pencil className="size-3.5" />
                                                 Rename
                                               </DropdownMenuItem>
                                               <DropdownMenuItem
                                                 className="text-xs font-semibold"
-                                                onClick={() => starBoard(b.id)}
+                                                onClick={() => toggleStar(b.id)}
                                               >
-                                                <Star className="size-3.5" />
+                                                <Star
+                                                  className={
+                                                    b.star
+                                                      ? "size-3.5 fill-yellow-400 text-yellow-400"
+                                                      : "size-3.5"
+                                                  }
+                                                />
                                                 Star
                                               </DropdownMenuItem>
                                               <AlertDialog>
@@ -492,8 +608,10 @@ export function AppSidebar() {
                                 )}
                                 <SidebarMenuSubItem>
                                   <Dialog
-                                    open={openBoard}
-                                    onOpenChange={setOpenBoard}
+                                    open={openBoard === w.id}
+                                    onOpenChange={(open) =>
+                                      setOpenBoard(open ? w.id : null)
+                                    }
                                   >
                                     <DialogTrigger asChild>
                                       <SidebarMenuSubButton className="text-xs font-semibold">
